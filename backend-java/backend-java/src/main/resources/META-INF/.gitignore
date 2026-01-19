@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+.env
+
+# Java / Maven
+target/
+*.class
+*.war
+*.ear
+*.log
+
+# Windows
+Thumbs.db
+Desktop.ini
