@@ -1,9 +1,49 @@
+version: '3.8'
+
 services:
+  # Capa de Datos: PostgreSQL
   db:
-    image: postgres:15
+    image: postgres:16
+    container_name: ipam_db
+    restart: always
     environment:
-      POSTGRES_USER: admin_red
-      POSTGRES_PASSWORD: password123
       POSTGRES_DB: gestion_ips
+      POSTGRES_USER: admin_red
+      POSTGRES_PASSWORD: celec_password123
     ports:
       - "5432:5432"
+    volumes:
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+
+  # Capa de Interfaz: Streamlit
+  frontend:
+    image: python:3.11-slim
+    container_name: ipam_frontend
+    working_dir: /app
+    volumes:
+      - ./frontend-python:/app
+    ports:
+      - "8501:8501"
+    environment:
+      - DB_HOST=db
+      - DB_NAME=gestion_ips
+      - DB_USER=admin_red
+      - DB_PASS=celec_password123
+    command: >
+      sh -c "pip install -r requirements.txt && 
+             streamlit run app.py --server.port=8501 --server.address=0.0.0.0"
+    depends_on:
+      - db
+
+  # Capa de Aplicación: WildFly (Opcional para pruebas en Codespaces)
+  backend:
+    image: jboss/wildfly:latest
+    container_name: ipam_backend
+    ports:
+      - "8080:8080"
+      - "9990:9990"
+    volumes:
+      - ./backend-java/target/backend-ipam.war:/opt/jboss/wildfly/standalone/deployments/backend-ipam.war
+    command: /opt/jboss/wildfly/bin/standalone.sh -b 0.0.0.0 -bmanagement 0.0.0.0
+    depends_on:
+      - db
