@@ -1,5 +1,6 @@
 import streamlit as st
 import base64
+import os
 import pandas as pd
 from network_utils import obtener_motor, generar_hash
 
@@ -35,30 +36,38 @@ def init_session():
 
 init_session()
 
-# --- 3. ESTILO Y FONDO PERSONALIZADO ---
+# --- 3. ESTILO Y FONDO PERSONALIZADO (CORREGIDO) ---
 def agregar_fondo(archivo):
-    try:
-        with open(archivo, "rb") as f:
-            data = f.read()
-        bin_str = base64.b64encode(data).decode()
-        st.markdown(f"""
-            <style>
-            .stApp {{
-                background-image: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), 
-                url("data:image/png;base64,{bin_str}");
-                background-size: cover;
-                background-attachment: fixed;
-            }}
-            h1, h2, h3, p, label, .stMetric, .stTabs [data-baseweb="tab"] {{
-                color: white !important;
-            }}
-            .stDataFrame {{
-                background-color: rgba(255, 255, 255, 0.05);
-                border-radius: 10px;
-            }}
-            </style>
-            """, unsafe_allow_html=True)
-    except FileNotFoundError:
+    if os.path.exists(archivo):
+        # Determina automáticamente la extensión (png, jpeg, jpg)
+        ext = "png" if archivo.lower().endswith(".png") else "jpeg"
+        try:
+            with open(archivo, "rb") as f:
+                data = f.read()
+            bin_str = base64.b64encode(data).decode()
+            st.markdown(f"""
+                <style>
+                .stApp {{
+                    background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), 
+                                url("data:image/{ext};base64,{bin_str}");
+                    background-size: cover;
+                    background-position: center;
+                    background-attachment: fixed;
+                }}
+                h1, h2, h3, p, label, .stMetric, .stTabs [data-baseweb="tab"] {{
+                    color: white !important;
+                }}
+                .stDataFrame {{
+                    background-color: rgba(255, 255, 255, 0.05);
+                    border-radius: 10px;
+                }}
+                </style>
+                """, unsafe_allow_html=True)
+        except Exception as e:
+            st.markdown("<style>.stApp {background-color: #111;}</style>", unsafe_allow_html=True)
+    else:
+        # Si la imagen no está en la raíz, muestra un aviso de depuración
+        st.sidebar.warning(f"⚠️ No se encontró '{archivo}' en el directorio principal.")
         st.markdown("<style>.stApp {background-color: #111;}</style>", unsafe_allow_html=True)
 
 agregar_fondo("fondo.jpg")
@@ -150,6 +159,6 @@ else:
 # --- 6. PIE DE PÁGINA ---
 st.markdown("""
     <div style="position: fixed; left: 0; bottom: 0; width: 100%; text-align: center; color: gray; font-size: 12px; padding: 10px; background-color: rgba(0,0,0,0.5);">
-        IPAM Corporativo CELEC © 2024 - Ambiente de Gestión Segura
+        IPAM Corporativo CELEC © 2026 - Ambiente de Gestión Segura
     </div>
     """, unsafe_allow_html=True)
