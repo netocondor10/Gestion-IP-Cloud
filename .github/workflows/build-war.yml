@@ -13,10 +13,10 @@ jobs:
     - name: Checkout del código
       uses: actions/checkout@v4
 
-    - name: Configurar JDK 17
+    - name: Configurar JDK 11
       uses: actions/setup-java@v4
       with:
-        java-version: '17'
+        java-version: '11'
         distribution: 'temurin'
         cache: maven
 
@@ -29,4 +29,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: backend-war-package
-        path: backend-java/target/*.war
+        path: backend-java/target/backend-ipam.war
+        if-no-files-found: error
